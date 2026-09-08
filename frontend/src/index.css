@@ -853,3 +853,180 @@ body {
   font-size: 13px;
   margin-top: 4px;
 }
+
+/* ==========================================================================
+   Government of Maharashtra Global Footer
+   ========================================================================== */
+.gov-footer {
+  background: #080C10;
+  color: #D1D5DB;
+  border-top: 1px solid #1E2631;
+  margin-top: auto;
+  font-size: 13px;
+}
+
+.gov-footer-top {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 28px 32px 28px;
+}
+
+.gov-footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.2fr;
+  gap: 36px;
+}
+
+.gov-footer-identity-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.gov-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gov-footer-mission {
+  color: #E5E7EB;
+  font-weight: 600;
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+.gov-footer-motto-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #D4AF37;
+  flex-wrap: wrap;
+}
+
+.gov-footer-dot {
+  color: #4B5563;
+}
+
+.gov-footer-connect {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.gov-footer-connect-label {
+  font-size: 12px;
+  color: #9CA3AF;
+}
+
+.gov-footer-social-icons {
+  display: flex;
+  gap: 8px;
+}
+
+.gov-social-icon-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  background: #141A22;
+  border: 1px solid #232D3B;
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.gov-social-icon-btn:hover {
+  background: #1F2937;
+  color: #F3F4F6;
+  border-color: #374151;
+}
+
+.gov-footer-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: #F9FAFB;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #1F2937;
+}
+
+.gov-footer-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gov-footer-link {
+  color: #9CA3AF;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  font-size: 13px;
+}
+
+.gov-footer-link:hover {
+  color: #60A5FA;
+}
+
+.gov-footer-external-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Bottom Copyright Bar */
+.gov-footer-bottom {
+  background: #05070A;
+  border-top: 1px solid #141A22;
+  padding: 16px 28px;
+}
+
+.gov-footer-bottom-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.gov-copyright-text {
+  font-size: 12px;
+  color: #9CA3AF;
+  font-weight: 500;
+}
+
+.gov-footer-disclaimer {
+  font-size: 11.5px;
+  color: #6B7280;
+}
+
+/* Footer Responsiveness */
+@media (max-width: 1024px) {
+  .gov-footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+}
+
+@media (max-width: 640px) {
+  .gov-footer-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .gov-footer-bottom-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+

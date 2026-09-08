@@ -4,6 +4,7 @@ import { RoleSelector } from './components/RoleSelector';
 import { OfficerDashboard } from './components/OfficerDashboard/OfficerDashboard';
 import { StartupDashboard } from './components/StartupDashboard/StartupDashboard';
 import { EvaluatorDashboard } from './components/EvaluatorDashboard/EvaluatorDashboard';
+import { Footer } from './components/Footer';
 import { Loader2 } from 'lucide-react';
 
 const DashboardRouter: React.FC = () => {
@@ -47,6 +48,7 @@ export const App: React.FC = () => {
         <main className="main-content">
           <DashboardRouter />
         </main>
+        <Footer />
       </div>
     </AuthProvider>
   );
