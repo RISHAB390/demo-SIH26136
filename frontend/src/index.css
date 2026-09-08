@@ -55,98 +55,250 @@ body {
   flex-direction: column;
 }
 
-/* Top Role Switcher Bar */
-.role-bar {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: #fff;
-  padding: 12px 24px;
+/* Government of Maharashtra Header / Navbar */
+.gov-header {
+  background: #0B0F14;
+  color: #F3F4F6;
+  padding: 12px 28px;
+  min-height: 76px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  gap: 20px;
+  border-bottom: 1px solid #1E2631;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
-.brand-section {
+.gov-brand-container {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+/* State Identity */
+.gov-state-identity {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.brand-badge {
-  background: #3b82f6;
-  color: #fff;
-  font-size: 11px;
+.gov-emblem-wrapper {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gov-emblem-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+
+.gov-state-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.gov-state-mr {
+  font-size: 15px;
   font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 4px;
+  color: #F9FAFB;
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+}
+
+.gov-state-en {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #D4AF37;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  line-height: 1.2;
+  margin-top: 2px;
 }
 
-.brand-title {
-  font-size: 16px;
+.gov-header-divider {
+  width: 1px;
+  height: 38px;
+  background: #222C38;
+}
+
+/* Platform Identity */
+.gov-platform-identity {
+  display: flex;
+  flex-direction: column;
+}
+
+.gov-platform-title {
+  font-size: 14.5px;
   font-weight: 700;
-  color: #f8fafc;
+  color: #E5E7EB;
+  letter-spacing: -0.1px;
+  line-height: 1.3;
 }
 
-.brand-sub {
-  font-size: 12px;
-  color: #94a3b8;
+.gov-platform-subtitle {
+  font-size: 11.5px;
+  color: #8B98A9;
+  font-weight: 400;
+  line-height: 1.2;
+  margin-top: 1px;
 }
 
-.role-selector-container {
+/* Right Actions & Persona Switcher */
+.gov-actions-container {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+  flex-shrink: 0;
 }
 
-.role-selector-label {
-  font-size: 13px;
-  color: #cbd5e1;
+.gov-persona-selector-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gov-selector-label {
+  font-size: 12px;
   font-weight: 500;
+  color: #8B98A9;
+  white-space: nowrap;
 }
 
-.user-select {
-  background: #334155;
-  color: #fff;
-  border: 1px solid #475569;
-  padding: 8px 14px;
+.gov-user-select {
+  background: #141A22;
+  color: #E5E7EB;
+  border: 1px solid #283342;
+  padding: 7px 12px;
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 500;
   outline: none;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
-.user-select:focus {
-  border-color: #60a5fa;
-  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
+.gov-user-select:hover {
+  border-color: #3B4A5D;
 }
 
-.active-persona-pill {
-  display: inline-flex;
+.gov-user-select:focus {
+  border-color: #4B6382;
+  box-shadow: 0 0 0 2px rgba(75, 99, 130, 0.25);
+}
+
+/* User Profile Badge */
+.gov-user-profile-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #141A22;
+  border: 1px solid #232D3B;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.gov-user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  background: #1C2430;
+  border: 1px solid #2E3B4D;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gov-icon-accent {
+  color: #94A3B8;
+}
+
+.gov-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.gov-user-name-row {
+  display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255,255,255,0.1);
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
 }
 
-.role-tag {
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 10px;
-  text-transform: uppercase;
-  font-weight: 800;
+.gov-user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #F3F4F6;
+  line-height: 1.2;
 }
-.role-officer { background: #3b82f6; color: #fff; }
-.role-startup { background: #10b981; color: #fff; }
-.role-evaluator { background: #8b5cf6; color: #fff; }
+
+.gov-role-pill {
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.gov-role-officer {
+  background: #172554;
+  color: #93C5FD;
+  border: 1px solid #1D4ED8;
+}
+
+.gov-role-startup {
+  background: #022C22;
+  color: #6EE7B7;
+  border: 1px solid #047857;
+}
+
+.gov-role-evaluator {
+  background: #2E1065;
+  color: #C4B5FD;
+  border: 1px solid #6D28D9;
+}
+
+.gov-user-email {
+  font-size: 11px;
+  color: #6B7280;
+  line-height: 1.2;
+  margin-top: 1px;
+}
+
+/* Header Responsiveness */
+@media (max-width: 1080px) {
+  .gov-header {
+    padding: 12px 16px;
+  }
+  .gov-header-divider {
+    display: none;
+  }
+  .gov-platform-subtitle {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .gov-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+  .gov-actions-container {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
 
 /* Main Content Area */
 .main-content {
