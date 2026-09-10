@@ -8,6 +8,8 @@ interface AuthContextType {
   setCurrentUser: (user: User) => void;
   loading: boolean;
   refreshUsers: () => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,9 +45,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Attempt to refresh token on mount
   useEffect(() => {
-    refreshUsers();
+    const attemptRefresh = async () => {
+      try {
+        await api.refreshToken();
+        await refreshUsers();
+      } catch (e) {
+        console.warn('Refresh token failed, user not logged in');
+        await refreshUsers();
+      }
+    };
+    attemptRefresh();
   }, []);
+
+  const login = async (email: string, password: string) => {
+    try {
+      const resp = await api.login(email, password);
+      // Expected shape { access_token: string, token_type?: string }
+      const token = resp?.access_token || resp?.token || '';
+      if (token) {
+        api.setToken(token);
+        localStorage.setItem('sih_demo_token', token);
+      }
+      // After successful login, fetch users and set the logged‑in user
+      const data = await api.getUsers();
+      setUsers(data);
+      const found = data.find((u) => u.email === email);
+      if (found) {
+        setCurrentUserState(found);
+        api.setUserId(found.id);
+      }
+    } catch (err) {
+      console.error('Login failed:', err);
+      throw err;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await api.logout();
+    } finally {
+      setCurrentUserState(null);
+      api.setUserId(null as any);
+    }
+  };
 
   const setCurrentUser = (user: User) => {
     setCurrentUserState(user);
@@ -53,7 +97,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, users, setCurrentUser, loading, refreshUsers }}>
+    <AuthContext.Provider
+      value={{ currentUser, users, setCurrentUser, loading, refreshUsers, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

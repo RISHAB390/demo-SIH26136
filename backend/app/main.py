@@ -10,6 +10,7 @@ from app.api.pilots import router as pilots_router
 from app.api.kpis import router as kpis_router
 from app.api.evidence import router as evidence_router
 from app.api.decisions import router as decisions_router
+from app.api.auth import router as auth_router
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -36,6 +37,8 @@ app.include_router(pilots_router)
 app.include_router(kpis_router)
 app.include_router(evidence_router)
 app.include_router(decisions_router)
+app.include_router(auth_router)
+# duplicate inclusion removed
 
 @app.get("/health")
 def health_check():

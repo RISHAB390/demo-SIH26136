@@ -16,6 +16,11 @@ const API_BASE = 'http://127.0.0.1:8000';
 
 class ApiClient {
   private currentUserId: number | null = null;
+  private token: string | null = null;
+
+  setToken(token: string | null) {
+    this.token = token;
+  }
 
   setUserId(id: number | null) {
     this.currentUserId = id;
@@ -40,10 +45,14 @@ class ApiClient {
     if (this.currentUserId) {
       headers['X-User-Id'] = String(this.currentUserId);
     }
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
 
     const response = await fetch(`${API_BASE}${path}`, {
       ...options,
       headers,
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -205,6 +214,26 @@ class ApiClient {
       body: JSON.stringify({ recommendation, notes }),
     });
   }
+  // Auth
+  async login(email: string, password: string): Promise<any> {
+    return this.request<any>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+  }
+
+  async refreshToken(): Promise<any> {
+    return this.request<any>('/auth/refresh', {
+      method: 'POST',
+    });
+  }
+
+  async logout(): Promise<any> {
+    return this.request<any>('/auth/logout', {
+      method: 'POST',
+    });
+  }
 }
+
 
 export const api = new ApiClient();

@@ -3,6 +3,7 @@ Repeatable seed script for SIH 26136 Demo MVP.
 Populates standard demonstration personas and realistic baseline challenges.
 """
 from app.database import SessionLocal
+from app.utils.security import get_password_hash
 from app.models.user import User
 from app.models.startup import Startup
 from app.models.challenge import Challenge
@@ -21,34 +22,39 @@ def seed_database():
         officer = User(
             name="Priya Sharma",
             role="officer",
-            email="priya.sharma@urban.gov.in"
-        )
-        # 2. Evaluator
+            email="priya.sharma@urban.gov.in",
+            password_hash=get_password_hash("demo123"))
+        # 2. Evaluator 
         evaluator = User(
             name="Rahul Verma",
             role="evaluator",
-            email="rahul.verma@techboard.gov.in"
+            email="rahul.verma@techboard.gov.in",
+            password_hash=get_password_hash("demo123")
         )
         # 3. Startups
         user_startup1 = User(
             name="AquaSense Technologies",
             role="startup",
-            email="contact@aquasense.io"
+            email="contact@aquasense.in",
+            password_hash=get_password_hash("demo123")
         )
         user_startup2 = User(
             name="JalTrack Innovations",
             role="startup",
-            email="founder@jaltrack.in"
+            email="founder@jaltrack.in",
+            password_hash=get_password_hash("demo123")
         )
         user_startup3 = User(
             name="HydroVision Labs",
             role="startup",
-            email="hello@hydrovision.tech"
+            email="hello@hydrovision.tech",
+            password_hash=get_password_hash("demo123")
         )
         user_startup4 = User(
             name="EcoUrban Systems",
             role="startup",
-            email="team@ecourban.org"
+            email="team@ecourban.org",
+            password_hash=get_password_hash("demo123")
         )
 
         db.add_all([officer, evaluator, user_startup1, user_startup2, user_startup3, user_startup4])

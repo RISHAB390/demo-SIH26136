@@ -9,6 +9,7 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(50), nullable=False)  # officer, startup, evaluator
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False, default="")  # bcrypt hash
 
     # Relationships
     startup = relationship("Startup", back_populates="user", uselist=False)
