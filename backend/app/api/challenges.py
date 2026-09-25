@@ -10,6 +10,16 @@ from app.policies.challenge import enforce_can_view
 
 router = APIRouter(prefix="/challenges", tags=["Challenges"])
 
+@router.get("/public", response_model=list[ChallengeResponse])
+def list_public_challenges(db: Session = Depends(get_db)):
+    """Public endpoint — no auth required. Returns all published challenges for the landing page."""
+    return (
+        db.query(Challenge)
+        .filter(Challenge.status == "published")
+        .order_by(Challenge.id.desc())
+        .all()
+    )
+
 @router.post("", response_model=ChallengeResponse, status_code=status.HTTP_201_CREATED)
 def create_challenge(
     challenge_in: ChallengeCreate,
