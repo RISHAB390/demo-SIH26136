@@ -16,10 +16,10 @@ import {
 } from 'lucide-react';
 
 import { FileViewerModal } from '../common/FileViewerModal';
-import { InnovationsCatalog } from '../InnovationsCatalog/InnovationsCatalog';
+
 
 export const OfficerDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'challenges' | 'applications' | 'pilots' | 'decision' | 'catalog'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'challenges' | 'applications' | 'pilots' | 'decision'>('overview');
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [pilots, setPilots] = useState<Pilot[]>([]);
@@ -314,16 +314,10 @@ export const OfficerDashboard: React.FC = () => {
         <button className={`tab-button ${activeTab === 'decision' ? 'active' : ''}`} onClick={() => setActiveTab('decision')}>
           <BarChart3 size={16} /> Decision Support
         </button>
-        <button className={`tab-button ${activeTab === 'catalog' ? 'active' : ''}`} onClick={() => setActiveTab('catalog')}>
-          Innovations Catalog
-        </button>
+
       </nav>
 
-      {activeTab === 'catalog' && (
-        <div style={{ marginTop: '24px' }}>
-          <InnovationsCatalog />
-        </div>
-      )}
+
 
       {/* OVERVIEW TAB */}
       {activeTab === 'overview' && (
@@ -393,7 +387,14 @@ export const OfficerDashboard: React.FC = () => {
           {challenges.map((c) => (
             <div key={c.id} className="content-card">
               <div className="content-card-header">
-                <h3 className="card-title">{c.title}</h3>
+                <h3 className="card-title">
+                  {c.title}
+                  {c.created_at && (
+                    <span style={{ fontSize: 12, color: '#64748b', fontWeight: 400, marginLeft: 8 }}>
+                      (Added on: {new Date(c.created_at).toLocaleDateString()})
+                    </span>
+                  )}
+                </h3>
                 <StatusBadge status={c.status} />
               </div>
               <div className="card-body">
@@ -424,13 +425,14 @@ export const OfficerDashboard: React.FC = () => {
                 <th>Score (0–100)</th>
                 <th>Status</th>
                 <th>Proposal Details</th>
+                <th>Compliance & Timeline</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {sortedApplications.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: 24, color: '#64748b' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: 24, color: '#64748b' }}>
                     No applications submitted yet. Switch to Startup persona to submit an application!
                   </td>
                 </tr>
@@ -441,14 +443,28 @@ export const OfficerDashboard: React.FC = () => {
 
                   return (
                     <tr key={app.id}>
-                      <td style={{ fontWeight: 700 }}>#{app.id}</td>
+                      <td style={{ fontWeight: 700 }}>
+                        #{app.id}
+                        {app.created_at && (
+                          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 400, marginTop: 4 }}>
+                            (Submitted on: {new Date(app.created_at).toLocaleDateString()})
+                          </div>
+                        )}
+                      </td>
                       <td style={{ fontWeight: 600 }}>{app.startup?.name || `Startup #${app.startup_id}`}</td>
                       <td>{challenge?.title || `Challenge #${app.challenge_id}`}</td>
                       <td>
                         {app.evaluation ? (
-                          <span style={{ fontWeight: 800, color: app.evaluation.score >= 70 ? '#10b981' : '#f59e0b', fontSize: 16 }}>
-                            {app.evaluation.score}/100
-                          </span>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            <span style={{ fontWeight: 800, color: app.evaluation.score >= 70 ? '#10b981' : '#f59e0b', fontSize: 16 }}>
+                              {app.evaluation.score}/100
+                            </span>
+                            {app.evaluation.created_at && (
+                              <div style={{ fontSize: 11, color: '#64748b' }}>
+                                (Reviewed on: {new Date(app.evaluation.created_at).toLocaleDateString()})
+                              </div>
+                            )}
+                          </div>
                         ) : (
                           <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Pending Evaluation</span>
                         )}
@@ -457,7 +473,7 @@ export const OfficerDashboard: React.FC = () => {
                         <StatusBadge status={app.status} />
                       </td>
                       <td style={{ maxWidth: 280 }}>
-                        <div style={{ fontSize: 13, color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={app.proposal_text}>
+                        <div style={{ fontSize: 13, color: '#475569', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }} title={app.proposal_text}>
                           {app.proposal_text}
                         </div>
                         {app.file_url && (
@@ -475,6 +491,29 @@ export const OfficerDashboard: React.FC = () => {
                             <strong>Evaluator Notes:</strong> {app.evaluation.notes}
                           </div>
                         )}
+                      </td>
+                      <td style={{ maxWidth: 250, fontSize: 12 }}>
+                        <div style={{ marginBottom: 8 }}>
+                          <strong>Status Timeline:</strong><br />
+                          Submitted ({app.created_at ? new Date(app.created_at).toLocaleDateString() : 'N/A'}) &rarr;{' '}
+                          {app.evaluation ? 'Evaluated (' + (app.evaluation.created_at ? new Date(app.evaluation.created_at).toLocaleDateString() : 'N/A') + ')' : 'Pending Eval'} &rarr;{' '}
+                          {app.status === 'shortlisted' ? 'Shortlisted' : '...'}
+                        </div>
+                        <div>
+                          <strong>Compliance Alerts:</strong><br />
+                          {app.startup?.sector !== challenge?.required_sector && (
+                            <div style={{ color: 'red', marginTop: 2 }}>🔴 Sector Mismatch ({app.startup?.sector})</div>
+                          )}
+                          {!app.startup?.dpiit_status && (
+                            <div style={{ color: '#f59e0b', marginTop: 2 }}>⚠️ Not DPIIT Recognized</div>
+                          )}
+                          {app.evaluation && app.evaluation.score < 50 && (
+                            <div style={{ color: 'red', marginTop: 2 }}>🔴 Low Score ({app.evaluation.score})</div>
+                          )}
+                          {app.startup?.sector === challenge?.required_sector && app.startup?.dpiit_status && (!app.evaluation || app.evaluation.score >= 50) && (
+                            <div style={{ color: '#10b981', marginTop: 2 }}>✅ Requirements Met</div>
+                          )}
+                        </div>
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: 6 }}>
@@ -510,25 +549,7 @@ export const OfficerDashboard: React.FC = () => {
                           {hasPilot && (
                             <span style={{ fontSize: 12, color: '#10b981', fontWeight: 600 }}>Pilot Active</span>
                           )}
-                          {app.status === 'shortlisted' && (
-                            <>
-                              <button
-                                className="btn btn-primary btn-sm"
-                                onClick={() => api.downloadProcurementOrder(app.id)}
-                                title="Download PDF Order"
-                              >
-                                📄 Generate Procurement Order
-                              </button>
-                              <button
-                                className="btn btn-secondary btn-sm"
-                                onClick={() => {
-                                  alert(`To list this procurement on GeM (Government e-Marketplace), visit gem.gov.in and create a Custom Bid. Reference: ${app.reference_id || 'APP-'+app.id}. This is a ProcureBridge-generated reference. Actual GeM integration requires GeM API credentials from the Government.`);
-                                }}
-                              >
-                                🔗 Export to GeM (Mock)
-                              </button>
-                            </>
-                          )}
+
                         </div>
                       </td>
                     </tr>

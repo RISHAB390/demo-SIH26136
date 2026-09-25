@@ -68,6 +68,7 @@ export interface Challenge {
   required_sector: string;
   dpiit_required: boolean;
   status: 'draft' | 'published' | 'closed';
+  created_at?: string;
 }
 
 export interface Evaluation {
@@ -76,6 +77,7 @@ export interface Evaluation {
   evaluator_id: number;
   score: number;
   notes: string;
+  created_at?: string;
 }
 
 export interface Application {
@@ -175,17 +177,3 @@ export interface Invoice {
   review_notes?: string | null;
 }
 
-export interface CatalogItem {
-  pilot_id: number;
-  application_reference_id: string;
-  startup_name: string;
-  startup_sector: string;
-  dpiit_status: boolean;
-  women_led: boolean;
-  make_in_india_class?: string | null;
-  challenge_title: string;
-  challenge_budget_band: string;
-  pilot_scope: string;
-  recommendation: string;
-  evaluation_score?: number | null;
-}

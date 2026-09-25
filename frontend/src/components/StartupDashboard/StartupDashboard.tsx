@@ -42,7 +42,7 @@ export const StartupDashboard: React.FC = () => {
 
   const [showEvidenceModal, setShowEvidenceModal] = useState(false);
   const [selectedKpi, setSelectedKpi] = useState<KPI | null>(null);
-  const [evidenceValue, setEvidenceValue] = useState<number>(0);
+  const [evidenceValue, setEvidenceValue] = useState<number | string>('');
   const [evidenceDesc, setEvidenceDesc] = useState('');
   const [evidenceFileUrl, setEvidenceFileUrl] = useState<string | null>(null);
 
@@ -184,7 +184,7 @@ export const StartupDashboard: React.FC = () => {
       });
       showToast('success', 'KPI evidence submitted for review!');
       setShowEvidenceModal(false);
-      setEvidenceValue(0);
+      setEvidenceValue('');
       setEvidenceDesc('');
       setEvidenceFileUrl(null);
       if (selectedPilot) {
@@ -243,7 +243,14 @@ export const StartupDashboard: React.FC = () => {
             return (
               <div key={c.id} className="content-card">
                 <div className="content-card-header">
-                  <h3 className="card-title">{c.title}</h3>
+                  <h3 className="card-title">
+                    {c.title}
+                    {c.created_at && (
+                      <span style={{ fontSize: 12, color: '#64748b', fontWeight: 400, marginLeft: 8 }}>
+                        (Added on: {new Date(c.created_at).toLocaleDateString()})
+                      </span>
+                    )}
+                  </h3>
                   <StatusBadge status={c.status} />
                 </div>
                 <div className="card-body">
@@ -329,20 +336,34 @@ export const StartupDashboard: React.FC = () => {
                   const challenge = challenges.find((c) => c.id === app.challenge_id);
                   return (
                     <tr key={app.id}>
-                      <td style={{ fontWeight: 700 }}>#{app.id}</td>
+                      <td style={{ fontWeight: 700 }}>
+                        #{app.id}
+                        {app.created_at && (
+                          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 400, marginTop: 4 }}>
+                            (Submitted on: {new Date(app.created_at).toLocaleDateString()})
+                          </div>
+                        )}
+                      </td>
                       <td style={{ fontWeight: 600 }}>{challenge?.title || `Challenge #${app.challenge_id}`}</td>
                       <td><StatusBadge status={app.status} /></td>
                       <td>
                         {app.evaluation ? (
-                          <span style={{ fontWeight: 800, color: app.evaluation.score >= 70 ? '#10b981' : '#f59e0b' }}>
-                            {app.evaluation.score} / 100
-                          </span>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            <span style={{ fontWeight: 800, color: app.evaluation.score >= 70 ? '#10b981' : '#f59e0b' }}>
+                              {app.evaluation.score} / 100
+                            </span>
+                            {app.evaluation.created_at && (
+                              <div style={{ fontSize: 11, color: '#64748b' }}>
+                                (Reviewed on: {new Date(app.evaluation.created_at).toLocaleDateString()})
+                              </div>
+                            )}
+                          </div>
                         ) : (
                           <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Pending Evaluation</span>
                         )}
                       </td>
                       <td style={{ maxWidth: 300 }}>
-                        <div style={{ fontSize: 13, color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: 13, color: '#475569', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                           {app.proposal_text}
                         </div>
                         {app.file_url && (
@@ -692,13 +713,19 @@ export const StartupDashboard: React.FC = () => {
                 <div className="form-group">
                   <label className="form-label">Submitted Value ({selectedKpi.unit})</label>
                   <input
-                    type="number"
+                    type={!isNaN(Number(selectedKpi.target_value)) ? "number" : "text"}
                     step="any"
                     className="form-input"
                     required
                     placeholder={`e.g. ${selectedKpi.target_value}`}
                     value={evidenceValue}
-                    onChange={(e) => setEvidenceValue(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => {
+                      if (!isNaN(Number(selectedKpi.target_value))) {
+                        setEvidenceValue(parseFloat(e.target.value) || 0);
+                      } else {
+                        setEvidenceValue(e.target.value);
+                      }
+                    }}
                   />
                 </div>
                 <div className="form-group">

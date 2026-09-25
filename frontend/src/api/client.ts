@@ -15,8 +15,7 @@ import type {
   DecisionSupport,
   EligibilityResult,
   Milestone,
-  Invoice,
-  CatalogItem
+  Invoice
 } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -410,30 +409,7 @@ class ApiClient {
     });
   }
 
-  // Catalog
-  getInnovationsCatalog(): Promise<CatalogItem[]> {
-    return this.request<CatalogItem[]>('/catalog');
-  }
 
-  // Procurement PDF download
-  downloadProcurementOrder(applicationId: number): void {
-    const token = this.getToken();
-    const API_BASE = import.meta.env.VITE_API_URL || '';
-    const url = `${API_BASE}/applications/${applicationId}/procurement-order/pdf`;
-    const a = document.createElement('a');
-    a.href = url;
-    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.blob())
-      .then(blob => {
-        const blobUrl = URL.createObjectURL(blob);
-        a.href = blobUrl;
-        a.download = `ProcurementOrder_APP-${new Date().getFullYear()}-${String(applicationId).padStart(5,'0')}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(blobUrl);
-      });
-  }
 }
 
 export const api = new ApiClient();
