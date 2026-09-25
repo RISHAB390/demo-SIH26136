@@ -7,7 +7,7 @@ from app.models.user import User
 
 router = APIRouter(prefix="/api/uploads", tags=["Uploads"])
 
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
+UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 MAX_SIZE = 5 * 1024 * 1024
