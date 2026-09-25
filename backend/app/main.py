@@ -14,6 +14,10 @@ from app.api.kpis import router as kpis_router
 from app.api.evidence import router as evidence_router
 from app.api.decisions import router as decisions_router
 from app.api.uploads import router as uploads_router
+from app.api.milestones import router as milestones_router
+from app.api.invoices import router as invoices_router
+from app.api.procurement import router as procurement_router
+from app.api.catalog import router as catalog_router
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -42,6 +46,10 @@ app.include_router(kpis_router)
 app.include_router(evidence_router)
 app.include_router(decisions_router)
 app.include_router(uploads_router)
+app.include_router(milestones_router)
+app.include_router(invoices_router)
+app.include_router(procurement_router)
+app.include_router(catalog_router)
 
 upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
 os.makedirs(upload_dir, exist_ok=True)

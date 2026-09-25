@@ -30,6 +30,9 @@ export interface RegisterPayload {
     sector: string;
     dpiit_status: boolean;
     profile_text: string;
+    msme_reg_no?: string;
+    women_led?: boolean;
+    make_in_india_class?: string | null;
   };
 }
 
@@ -49,6 +52,9 @@ export interface Startup {
   sector: string;
   dpiit_status: boolean;
   profile_text: string;
+  msme_reg_no?: string | null;
+  women_led?: boolean;
+  make_in_india_class?: string | null;
 }
 
 export interface Challenge {
@@ -81,6 +87,8 @@ export interface Application {
   file_url?: string | null;
   startup?: Startup;
   evaluation?: Evaluation;
+  reference_id?: string;
+  created_at?: string;
 }
 
 export interface KPI {
@@ -119,6 +127,8 @@ export interface Pilot {
   kpis?: KPI[];
   decision?: Decision | null;
   application?: Application;
+  total_budget?: number | null;
+  milestones?: Milestone[];
 }
 
 export interface DecisionSupport {
@@ -137,4 +147,45 @@ export interface EligibilityResult {
   sector_message: string;
   dpiit_message: string;
   guidance: string;
+}
+
+export interface Milestone {
+  id: number;
+  pilot_id: number;
+  name: string;
+  description: string;
+  percentage_of_budget: number;
+  due_date: string;
+  status: 'pending' | 'released';
+  released_at?: string | null;
+  release_notes?: string | null;
+  invoices: Invoice[];
+}
+
+export interface Invoice {
+  id: number;
+  milestone_id: number;
+  startup_id: number;
+  amount: number;
+  description: string;
+  file_url?: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  submitted_at: string;
+  reviewed_at?: string | null;
+  review_notes?: string | null;
+}
+
+export interface CatalogItem {
+  pilot_id: number;
+  application_reference_id: string;
+  startup_name: string;
+  startup_sector: string;
+  dpiit_status: boolean;
+  women_led: boolean;
+  make_in_india_class?: string | null;
+  challenge_title: string;
+  challenge_budget_band: string;
+  pilot_scope: string;
+  recommendation: string;
+  evaluation_score?: number | null;
 }

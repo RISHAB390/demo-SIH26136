@@ -113,6 +113,9 @@ def register(payload: UserRegister, db: Session = Depends(get_db)):
             sector=sp.sector,
             dpiit_status=sp.dpiit_status,
             profile_text=sp.profile_text,
+            msme_reg_no=sp.msme_reg_no,
+            women_led=sp.women_led,
+            make_in_india_class=sp.make_in_india_class,
         )
         db.add(startup_obj)
 

@@ -13,10 +13,13 @@ import type {
   Evidence,
   Decision,
   DecisionSupport,
-  EligibilityResult
+  EligibilityResult,
+  Milestone,
+  Invoice,
+  CatalogItem
 } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 class ApiClient {
   private jwtToken: string | null = null;
@@ -367,6 +370,69 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify({ recommendation, notes }),
     });
+  }
+
+  // Milestones
+  listMilestones(pilotId: number): Promise<Milestone[]> {
+    return this.request<Milestone[]>(`/pilots/${pilotId}/milestones`);
+  }
+
+  createMilestone(pilotId: number, data: { name: string; description: string; percentage_of_budget: number; due_date: string }): Promise<Milestone> {
+    return this.request<Milestone>(`/pilots/${pilotId}/milestones`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  releaseMilestone(milestoneId: number, release_notes?: string): Promise<Milestone> {
+    return this.request<Milestone>(`/milestones/${milestoneId}/release`, {
+      method: 'PATCH',
+      body: JSON.stringify({ release_notes }),
+    });
+  }
+
+  // Invoices
+  submitInvoice(milestoneId: number, data: { amount: number; description: string; file_url?: string | null }): Promise<Invoice> {
+    return this.request<Invoice>(`/milestones/${milestoneId}/invoices`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  listInvoices(milestoneId: number): Promise<Invoice[]> {
+    return this.request<Invoice[]>(`/milestones/${milestoneId}/invoices`);
+  }
+
+  reviewInvoice(milestoneId: number, invoiceId: number, data: { status: 'approved' | 'rejected'; review_notes?: string }): Promise<Invoice> {
+    return this.request<Invoice>(`/milestones/${milestoneId}/invoices/${invoiceId}/review`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Catalog
+  getInnovationsCatalog(): Promise<CatalogItem[]> {
+    return this.request<CatalogItem[]>('/catalog');
+  }
+
+  // Procurement PDF download
+  downloadProcurementOrder(applicationId: number): void {
+    const token = this.getToken();
+    const API_BASE = import.meta.env.VITE_API_URL || '';
+    const url = `${API_BASE}/applications/${applicationId}/procurement-order/pdf`;
+    const a = document.createElement('a');
+    a.href = url;
+    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.blob())
+      .then(blob => {
+        const blobUrl = URL.createObjectURL(blob);
+        a.href = blobUrl;
+        a.download = `ProcurementOrder_APP-${new Date().getFullYear()}-${String(applicationId).padStart(5,'0')}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      });
   }
 }
 

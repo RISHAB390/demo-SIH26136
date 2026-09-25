@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../api/client';
 import type { Application, Challenge } from '../../types';
 import { StatusBadge } from '../StatusBadge';
-import { Award, CheckCircle, Clock, X } from 'lucide-react';
+import { Award, CheckCircle, Clock, X, FileText } from 'lucide-react';
+import { FileViewerModal } from '../common/FileViewerModal';
+import { InnovationsCatalog } from '../InnovationsCatalog/InnovationsCatalog';
 
 export const EvaluatorDashboard: React.FC = () => {
   const [applications, setApplications] = useState<Application[]>([]);
@@ -12,11 +14,14 @@ export const EvaluatorDashboard: React.FC = () => {
   const [notes, setNotes] = useState<string>('');
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [viewingFile, setViewingFile] = useState<string | null>(null);
 
   const showToast = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
     setTimeout(() => setNotification(null), 4000);
   };
+
+  const [activeTab, setActiveTab] = useState<'evaluations' | 'catalog'>('evaluations');
 
   const loadData = async () => {
     try {
@@ -70,6 +75,17 @@ export const EvaluatorDashboard: React.FC = () => {
         </div>
       </div>
 
+      <nav className="tabs-nav">
+        <button className={`tab-button ${activeTab === 'evaluations' ? 'active' : ''}`} onClick={() => setActiveTab('evaluations')}>
+          Evaluations
+        </button>
+        <button className={`tab-button ${activeTab === 'catalog' ? 'active' : ''}`} onClick={() => setActiveTab('catalog')}>
+          Innovations Catalog
+        </button>
+      </nav>
+
+      {activeTab === 'evaluations' && (
+
       <div className="table-container">
         <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', fontWeight: 700, fontSize: 16 }}>
           Submissions for Evaluation ({applications.length})
@@ -100,7 +116,7 @@ export const EvaluatorDashboard: React.FC = () => {
 
                 return (
                   <tr key={app.id}>
-                    <td style={{ fontWeight: 700 }}>#{app.id}</td>
+                    <td style={{ fontWeight: 700 }}>{app.reference_id || `#${app.id}`}</td>
                     <td style={{ fontWeight: 600 }}>{app.startup?.name || `Startup #${app.startup_id}`}</td>
                     <td>{challenge?.title || `Challenge #${app.challenge_id}`}</td>
                     <td><StatusBadge status={app.status} /></td>
@@ -125,9 +141,12 @@ export const EvaluatorDashboard: React.FC = () => {
                       </div>
                       {app.file_url && (
                         <div style={{ marginTop: 6 }}>
-                          <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}${app.file_url}`} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#2563eb', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
-                            View Proposal PDF
-                          </a>
+                          <button
+                            onClick={() => setViewingFile(app.file_url || null)}
+                            style={{ background: 'none', border: 'none', padding: 0, fontSize: 12, color: '#2563eb', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                          >
+                            <FileText size={12} /> View Document
+                          </button>
                         </div>
                       )}
                     </td>
@@ -155,13 +174,14 @@ export const EvaluatorDashboard: React.FC = () => {
           </tbody>
         </table>
       </div>
+      )}
 
       {/* EVALUATION MODAL */}
       {showScoreModal && selectedApp && (
         <div className="modal-overlay">
           <div className="modal-dialog">
             <div className="modal-header">
-              <h3 className="modal-title">Evaluate Application #{selectedApp.id}</h3>
+              <h3 className="modal-title">Evaluate Application {selectedApp.reference_id || `#${selectedApp.id}`}</h3>
               <button className="modal-close-btn" onClick={() => setShowScoreModal(false)}><X size={18} /></button>
             </div>
             <form onSubmit={handleScoreSubmit}>
@@ -177,9 +197,13 @@ export const EvaluatorDashboard: React.FC = () => {
                   </p>
                   {selectedApp.file_url && (
                     <div style={{ marginTop: 8 }}>
-                      <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}${selectedApp.file_url}`} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: '#2563eb', fontWeight: 600, textDecoration: 'none' }}>
-                        📥 Download Attached Proposal Document
-                      </a>
+                      <button
+                        type="button"
+                        onClick={() => setViewingFile(selectedApp.file_url || null)}
+                        style={{ background: 'none', border: 'none', padding: 0, fontSize: 13, color: '#2563eb', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                      >
+                        <FileText size={14} /> View Attached Proposal Document
+                      </button>
                     </div>
                   )}
                 </div>
@@ -222,6 +246,14 @@ export const EvaluatorDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {activeTab === 'catalog' && (
+        <div style={{ marginTop: '24px' }}>
+          <InnovationsCatalog />
+        </div>
+      )}
+
+      <FileViewerModal fileUrl={viewingFile} onClose={() => setViewingFile(null)} />
     </div>
   );
 };

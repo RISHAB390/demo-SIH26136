@@ -15,8 +15,11 @@ import {
   Award
 } from 'lucide-react';
 
+import { FileViewerModal } from '../common/FileViewerModal';
+import { InnovationsCatalog } from '../InnovationsCatalog/InnovationsCatalog';
+
 export const OfficerDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'challenges' | 'applications' | 'pilots' | 'decision'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'challenges' | 'applications' | 'pilots' | 'decision' | 'catalog'>('overview');
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [pilots, setPilots] = useState<Pilot[]>([]);
@@ -24,6 +27,7 @@ export const OfficerDashboard: React.FC = () => {
   const [pilotKpis, setPilotKpis] = useState<KPI[]>([]);
   const [pilotEvidence, setPilotEvidence] = useState<Evidence[]>([]);
   const [decisionSupport, setDecisionSupport] = useState<DecisionSupport | null>(null);
+  const [viewingFile, setViewingFile] = useState<string | null>(null);
   
   // Modals
   const [showCreateChallenge, setShowCreateChallenge] = useState(false);
@@ -60,6 +64,18 @@ export const OfficerDashboard: React.FC = () => {
     recommendation: 'Recommend Scale',
     notes: '',
   });
+
+  const [showAddMilestone, setShowAddMilestone] = useState(false);
+  const [newMilestone, setNewMilestone] = useState({
+    name: '',
+    description: '',
+    percentage_of_budget: 0,
+    due_date: new Date().toISOString().split('T')[0]
+  });
+
+  const [showReleaseModal, setShowReleaseModal] = useState(false);
+  const [selectedMilestone, setSelectedMilestone] = useState<any>(null);
+  const [releaseNotes, setReleaseNotes] = useState('');
 
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -212,6 +228,46 @@ export const OfficerDashboard: React.FC = () => {
     }
   };
 
+  const handleAddMilestone = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedPilot) return;
+    try {
+      await api.createMilestone(selectedPilot.id, newMilestone);
+      showToast('success', 'Milestone added successfully');
+      setShowAddMilestone(false);
+      setNewMilestone({ name: '', description: '', percentage_of_budget: 0, due_date: new Date().toISOString().split('T')[0] });
+      loadData();
+    } catch (err: unknown) {
+      showToast('error', err instanceof Error ? err.message : 'Failed to add milestone');
+    }
+  };
+
+  const handleReleaseTranche = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedMilestone) return;
+    try {
+      await api.releaseMilestone(selectedMilestone.id, releaseNotes);
+      showToast('success', 'Tranche released');
+      setShowReleaseModal(false);
+      setReleaseNotes('');
+      loadData();
+    } catch (err: unknown) {
+      showToast('error', err instanceof Error ? err.message : 'Failed to release tranche');
+    }
+  };
+
+  const handleReviewInvoice = async (milestoneId: number, invoiceId: number, status: 'approved'|'rejected') => {
+    const notes = window.prompt(`Enter review notes for ${status} invoice:`);
+    if (notes === null) return;
+    try {
+      await api.reviewInvoice(milestoneId, invoiceId, { status, review_notes: notes });
+      showToast('success', `Invoice ${status}`);
+      loadData();
+    } catch (err: unknown) {
+      showToast('error', err instanceof Error ? err.message : 'Failed to review invoice');
+    }
+  };
+
   // Sort applications by score descending (evaluations score)
   const sortedApplications = [...applications].sort((a, b) => {
     const scoreA = a.evaluation?.score ?? -1;
@@ -258,7 +314,16 @@ export const OfficerDashboard: React.FC = () => {
         <button className={`tab-button ${activeTab === 'decision' ? 'active' : ''}`} onClick={() => setActiveTab('decision')}>
           <BarChart3 size={16} /> Decision Support
         </button>
+        <button className={`tab-button ${activeTab === 'catalog' ? 'active' : ''}`} onClick={() => setActiveTab('catalog')}>
+          Innovations Catalog
+        </button>
       </nav>
+
+      {activeTab === 'catalog' && (
+        <div style={{ marginTop: '24px' }}>
+          <InnovationsCatalog />
+        </div>
+      )}
 
       {/* OVERVIEW TAB */}
       {activeTab === 'overview' && (
@@ -397,9 +462,12 @@ export const OfficerDashboard: React.FC = () => {
                         </div>
                         {app.file_url && (
                           <div style={{ marginTop: 6 }}>
-                            <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}${app.file_url}`} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#2563eb', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <button
+                              onClick={() => setViewingFile(app.file_url || null)}
+                              style={{ background: 'none', border: 'none', padding: 0, fontSize: 12, color: '#2563eb', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                            >
                               <FileText size={12} /> View Document
-                            </a>
+                            </button>
                           </div>
                         )}
                         {app.evaluation?.notes && (
@@ -441,6 +509,25 @@ export const OfficerDashboard: React.FC = () => {
                           )}
                           {hasPilot && (
                             <span style={{ fontSize: 12, color: '#10b981', fontWeight: 600 }}>Pilot Active</span>
+                          )}
+                          {app.status === 'shortlisted' && (
+                            <>
+                              <button
+                                className="btn btn-primary btn-sm"
+                                onClick={() => api.downloadProcurementOrder(app.id)}
+                                title="Download PDF Order"
+                              >
+                                📄 Generate Procurement Order
+                              </button>
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => {
+                                  alert(`To list this procurement on GeM (Government e-Marketplace), visit gem.gov.in and create a Custom Bid. Reference: ${app.reference_id || 'APP-'+app.id}. This is a ProcureBridge-generated reference. Actual GeM integration requires GeM API credentials from the Government.`);
+                                }}
+                              >
+                                🔗 Export to GeM (Mock)
+                              </button>
+                            </>
                           )}
                         </div>
                       </td>
@@ -581,9 +668,12 @@ export const OfficerDashboard: React.FC = () => {
                                   <div>{ev.description}</div>
                                   {ev.file_ref && (
                                     <div style={{ marginTop: 6 }}>
-                                      <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}${ev.file_ref}`} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#2563eb', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                      <button
+                                        onClick={() => setViewingFile(ev.file_ref || null)}
+                                        style={{ background: 'none', border: 'none', padding: 0, fontSize: 12, color: '#2563eb', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                                      >
                                         <FileText size={12} /> View Evidence Document
-                                      </a>
+                                      </button>
                                     </div>
                                   )}
                                 </td>
@@ -615,6 +705,110 @@ export const OfficerDashboard: React.FC = () => {
                       </tbody>
                     </table>
                   </div>
+
+                  {/* Financial Tracking Panel */}
+                  <div className="content-card">
+                    <div className="content-card-header">
+                      <div>
+                        <h3 className="card-title">💰 Financial Tracking</h3>
+                        <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
+                          Total Budget: <strong>₹{selectedPilot.total_budget?.toLocaleString('en-IN') || 'Not Set'}</strong>
+                        </div>
+                      </div>
+                      <button className="btn btn-primary btn-sm" onClick={() => setShowAddMilestone(true)}>
+                        <PlusCircle size={14} /> Add Milestone
+                      </button>
+                    </div>
+
+                    {(!selectedPilot.milestones || selectedPilot.milestones.length === 0) ? (
+                      <div style={{ fontSize: 14, color: '#64748b', fontStyle: 'italic', marginTop: 12 }}>
+                        No milestones defined. Click "Add Milestone" to start financial tracking.
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 16 }}>
+                        {selectedPilot.milestones.map((m) => {
+                          const isReleased = m.status === 'released';
+                          return (
+                            <div key={m.id} style={{ padding: 16, border: '1px solid #e2e8f0', borderRadius: 8 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div>
+                                  <div style={{ fontWeight: 700, fontSize: 16 }}>{m.name} ({m.percentage_of_budget}%)</div>
+                                  <div style={{ fontSize: 13, color: '#475569', marginTop: 4 }}>{m.description}</div>
+                                  <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Due: {new Date(m.due_date).toLocaleDateString()}</div>
+                                </div>
+                                <div>
+                                  {isReleased ? (
+                                    <span style={{ padding: '4px 8px', background: '#ecfdf5', color: '#059669', borderRadius: 4, fontSize: 12, fontWeight: 600 }}>
+                                      Released ✓
+                                    </span>
+                                  ) : (
+                                    <button
+                                      className="btn btn-success btn-sm"
+                                      onClick={() => {
+                                        setSelectedMilestone(m);
+                                        setShowReleaseModal(true);
+                                      }}
+                                    >
+                                      Release Tranche
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                              {isReleased && m.release_notes && (
+                                <div style={{ marginTop: 8, fontSize: 12, color: '#059669', fontStyle: 'italic' }}>
+                                  Notes: {m.release_notes}
+                                </div>
+                              )}
+                              {m.invoices && m.invoices.length > 0 && (
+                                <div style={{ marginTop: 12 }}>
+                                  <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 8, color: '#334155' }}>Submitted Invoices</div>
+                                  <table className="app-table" style={{ fontSize: 12 }}>
+                                    <thead>
+                                      <tr>
+                                        <th>ID</th>
+                                        <th>Amount</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {m.invoices.map(inv => (
+                                        <tr key={inv.id}>
+                                          <td>#{inv.id}</td>
+                                          <td>₹{inv.amount.toLocaleString('en-IN')}</td>
+                                          <td>
+                                            {inv.description}
+                                            {inv.file_url && (
+                                              <div style={{ marginTop: 4 }}>
+                                                <button onClick={() => setViewingFile(inv.file_url || null)} style={{ background: 'none', border: 'none', padding: 0, fontSize: 11, color: '#2563eb', cursor: 'pointer' }}>View Invoice</button>
+                                              </div>
+                                            )}
+                                          </td>
+                                          <td><StatusBadge status={inv.status} /></td>
+                                          <td>
+                                            {inv.status === 'pending' ? (
+                                              <div style={{ display: 'flex', gap: 6 }}>
+                                                <button className="btn btn-success btn-sm" style={{ padding: '2px 6px', fontSize: 11 }} onClick={() => handleReviewInvoice(m.id, inv.id, 'approved')}>Approve</button>
+                                                <button className="btn btn-danger btn-sm" style={{ padding: '2px 6px', fontSize: 11 }} onClick={() => handleReviewInvoice(m.id, inv.id, 'rejected')}>Reject</button>
+                                              </div>
+                                            ) : (
+                                              <span style={{ fontSize: 11, color: '#64748b' }}>{inv.review_notes || 'Reviewed'}</span>
+                                            )}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
                 </div>
               )}
             </div>
@@ -927,6 +1121,70 @@ export const OfficerDashboard: React.FC = () => {
           </div>
         </div>
       )}
+      
+      {/* ADD MILESTONE MODAL */}
+      {showAddMilestone && selectedPilot && (
+        <div className="modal-overlay">
+          <div className="modal-dialog">
+            <div className="modal-header">
+              <h3 className="modal-title">Add Milestone to Pilot #{selectedPilot.id}</h3>
+              <button className="modal-close-btn" onClick={() => setShowAddMilestone(false)}><X size={18} /></button>
+            </div>
+            <form onSubmit={handleAddMilestone}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label className="form-label">Milestone Name</label>
+                  <input type="text" className="form-input" required value={newMilestone.name} onChange={(e) => setNewMilestone({...newMilestone, name: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Description</label>
+                  <textarea className="form-textarea" required value={newMilestone.description} onChange={(e) => setNewMilestone({...newMilestone, description: e.target.value})} />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div className="form-group">
+                    <label className="form-label">Percentage of Budget (%)</label>
+                    <input type="number" className="form-input" required value={newMilestone.percentage_of_budget} onChange={(e) => setNewMilestone({...newMilestone, percentage_of_budget: Number(e.target.value)})} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Due Date</label>
+                    <input type="date" className="form-input" required value={newMilestone.due_date} onChange={(e) => setNewMilestone({...newMilestone, due_date: e.target.value})} />
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowAddMilestone(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary">Save Milestone</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* RELEASE TRANCHE MODAL */}
+      {showReleaseModal && selectedMilestone && (
+        <div className="modal-overlay">
+          <div className="modal-dialog">
+            <div className="modal-header">
+              <h3 className="modal-title">Release Tranche: {selectedMilestone.name}</h3>
+              <button className="modal-close-btn" onClick={() => setShowReleaseModal(false)}><X size={18} /></button>
+            </div>
+            <form onSubmit={handleReleaseTranche}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label className="form-label">Release Notes / UTR Reference</label>
+                  <textarea className="form-textarea" required value={releaseNotes} onChange={(e) => setReleaseNotes(e.target.value)} />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowReleaseModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-success">Confirm Release</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <FileViewerModal fileUrl={viewingFile} onClose={() => setViewingFile(null)} />
     </div>
   );
 };
