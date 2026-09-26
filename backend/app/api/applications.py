@@ -115,6 +115,7 @@ def get_application(
 
     return application
 
+from app.utils.file_utils import delete_uploaded_file
 from app.workflows.application import transition_application
 
 @router.patch("/{application_id}/status", response_model=ApplicationResponse)
@@ -130,6 +131,10 @@ def update_application_status(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Application not found")
 
     transition_application(application, status_update.status, current_user)
+    
+    if status_update.status == "rejected" and application.file_url:
+        delete_uploaded_file(application.file_url)
+        application.file_url = None
     
     db.commit()
     db.refresh(application)
