@@ -5,8 +5,11 @@ Authentication endpoints:
   GET  /api/auth/me        — JWT-protected own profile
   GET  /api/auth/me/startup — JWT-protected own startup profile
 """
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from sqlalchemy.orm import Session
+from datetime import datetime, timezone, timedelta
+import secrets
+import hashlib
 
 from app.auth import (
     create_access_token,
@@ -18,6 +21,7 @@ from app.config import settings
 from app.database import get_db
 from app.models.startup import Startup
 from app.models.user import User
+from app.models.refresh_token import RefreshToken
 from app.schemas.startup import StartupResponse
 from app.schemas.user import TokenResponse, UserLogin, UserRegister, UserResponse
 
@@ -134,18 +138,11 @@ def register(payload: UserRegister, db: Session = Depends(get_db)):
 
 
 # ── POST /api/auth/login ──────────────────────────────────────────────────────
-from fastapi import Response
-import secrets
-import hashlib
-from datetime import datetime, timezone, timedelta
-from app.models.refresh_token import RefreshToken
-
 # Simple in-memory rate limiter (note: not suitable for multi-worker deployments)
 _login_attempts = {}
 
 def check_rate_limit(identifier: str, max_attempts: int = 5, window_minutes: int = 15) -> bool:
     """Simple in-memory rate limiting for login attempts."""
-    from datetime import datetime, timezone
     now = datetime.now(timezone.utc)
     window_start = now - timedelta(minutes=window_minutes)
 
@@ -284,9 +281,6 @@ def get_my_startup_profile(
     return startup
 
 # ── POST /api/auth/refresh ────────────────────────────────────────────────────
-from fastapi import Request, Response
-from app.models.refresh_token import RefreshToken
-
 @router.post("/refresh")
 def refresh_token(request: Request, response: Response, db: Session = Depends(get_db)):
     """

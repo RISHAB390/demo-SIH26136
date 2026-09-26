@@ -1,5 +1,4 @@
 import os
-import shutil
 import uuid
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status
 from app.auth import get_current_user

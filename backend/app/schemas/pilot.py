@@ -20,7 +20,6 @@ class PilotCreate(PilotBase):
     application_id: int
     total_budget: Decimal | None = None
 
-from typing import Any
 class PilotResponse(PilotBase):
     id: int
     application_id: int
