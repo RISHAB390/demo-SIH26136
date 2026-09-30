@@ -14,6 +14,7 @@ import type {
   Decision,
   DecisionSupport,
   EligibilityResult,
+  AIMatchResponse,
   Milestone,
   Invoice
 } from '../types';
@@ -371,6 +372,11 @@ class ApiClient {
     });
   }
 
+  // AI Matching Microservice
+  getAIMatchingRecommendations(challengeId: number, topN: number = 10): Promise<AIMatchResponse> {
+    return this.request<AIMatchResponse>(`/api/matching/recommendations/${challengeId}?top_n=${topN}`);
+  }
+
   // Milestones
   listMilestones(pilotId: number): Promise<Milestone[]> {
     return this.request<Milestone[]>(`/pilots/${pilotId}/milestones`);
@@ -408,8 +414,6 @@ class ApiClient {
       body: JSON.stringify(data),
     });
   }
-
-
 }
 
 export const api = new ApiClient();

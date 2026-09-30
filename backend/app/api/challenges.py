@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 from app.database import get_db
 from app.models.challenge import Challenge
 from app.models.user import User
 from app.schemas.challenge import ChallengeCreate, ChallengeResponse
 from app.auth import get_current_user, require_role
-
 from app.policies.challenge import enforce_can_view
+from app.workflows.challenge import transition_challenge
 
 router = APIRouter(prefix="/challenges", tags=["Challenges"])
 
@@ -67,9 +68,6 @@ def get_challenge(
         
     enforce_can_view(current_user, challenge)
     return challenge
-
-from app.workflows.challenge import transition_challenge
-from pydantic import BaseModel
 
 class ChallengeStatusUpdate(BaseModel):
     status: str

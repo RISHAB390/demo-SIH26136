@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: sih-backend
+    env: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:///./sih.db
+      - key: JWT_SECRET_KEY
+        value: super-secret-production-key-12345678901234567890
+      - key: DEMO_MODE
+        value: "true"
+      - key: CORS_ORIGINS
+        value: '["https://demosih26136.netlify.app", "http://localhost:5173"]'
+      - key: AI_SERVICE_URL
+        value: http://localhost:8001

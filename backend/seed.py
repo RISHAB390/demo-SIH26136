@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from sqlalchemy.orm import Session
 from app.database import engine, SessionLocal, Base
-from app.models import *  # registers all models with Base
+from app.models import *  # noqa: F403  # registers all models with Base
 from app.models.user import User
 from app.models.startup import Startup
 from app.models.department import Department

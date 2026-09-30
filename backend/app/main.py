@@ -14,6 +14,7 @@ from app.api.kpis import router as kpis_router
 from app.api.evidence import router as evidence_router
 from app.api.decisions import router as decisions_router
 from app.api.uploads import router as uploads_router
+from app.api.matching import router as matching_router
 from app.api.milestones import router as milestones_router
 from app.api.invoices import router as invoices_router
 
@@ -44,6 +45,7 @@ app.include_router(kpis_router)
 app.include_router(evidence_router)
 app.include_router(decisions_router)
 app.include_router(uploads_router)
+app.include_router(matching_router)
 app.include_router(milestones_router)
 app.include_router(invoices_router)
 

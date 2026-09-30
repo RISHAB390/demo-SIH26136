@@ -1,6 +1,6 @@
 from decimal import Decimal
 from typing import Optional
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 
 class InvoiceCreate(BaseModel):
     amount: Decimal = Field(..., gt=0)
@@ -11,6 +11,4 @@ class InvoiceReview(BaseModel):
     status: str = Field(..., pattern="^(approved|rejected)$")
     review_notes: Optional[str] = None
 
-from datetime import datetime
-from app.schemas.milestone import InvoiceResponse
 

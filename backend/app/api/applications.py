@@ -7,6 +7,8 @@ from app.models.startup import Startup
 from app.models.user import User
 from app.schemas.application import ApplicationCreate, ApplicationStatusUpdate, ApplicationResponse
 from app.auth import get_current_user, require_role
+from app.utils.file_utils import delete_uploaded_file
+from app.workflows.application import transition_application
 
 router = APIRouter(prefix="/applications", tags=["Applications"])
 
@@ -114,9 +116,6 @@ def get_application(
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
 
     return application
-
-from app.utils.file_utils import delete_uploaded_file
-from app.workflows.application import transition_application
 
 @router.patch("/{application_id}/status", response_model=ApplicationResponse)
 def update_application_status(
