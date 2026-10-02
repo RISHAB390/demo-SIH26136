@@ -24,6 +24,29 @@ app = FastAPI(
     version="1.0.0"
 )
 
+@app.on_event("startup")
+def startup_db_init():
+    """Ensure database tables and baseline demo data exist on server startup."""
+    try:
+        from app.database import Base, engine
+        import app.models.user
+        import app.models.startup
+        import app.models.challenge
+        import app.models.application
+        import app.models.evaluation
+        import app.models.pilot
+        import app.models.kpi
+        import app.models.evidence
+        import app.models.decision
+        
+        Base.metadata.create_all(bind=engine)
+        
+        from app.seed import seed_database
+        seed_database()
+        print("Database startup initialization completed successfully.")
+    except Exception as e:
+        print(f"Startup DB initialization warning: {e}")
+
 # CORS Middleware to allow React / Vite frontend
 app.add_middleware(
     CORSMiddleware,
