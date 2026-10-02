@@ -17,7 +17,12 @@ class Settings(BaseSettings):
     GOV_EMAIL_DOMAINS: str = "gov.in,nic.in"
     ALLOW_OPEN_GOV_REGISTRATION: bool = False
 
-    CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
+    CORS_ORIGINS: List[str] = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://demosih26136.netlify.app",
+        "https://demo-sih26136.netlify.app"
+    ]
 
     # AI Model Microservice URL
     AI_SERVICE_URL: str = "http://localhost:8001"
