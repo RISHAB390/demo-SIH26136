@@ -29,15 +29,7 @@ def startup_db_init():
     """Ensure database tables and baseline demo data exist on server startup."""
     try:
         from app.database import Base, engine
-        import app.models.user
-        import app.models.startup
-        import app.models.challenge
-        import app.models.application
-        import app.models.evaluation
-        import app.models.pilot
-        import app.models.kpi
-        import app.models.evidence
-        import app.models.decision
+        import app.models  # Registers all models (User, Challenge, Department, etc.)
         
         Base.metadata.create_all(bind=engine)
         
