@@ -51,10 +51,13 @@ def list_challenges(
     db: Session = Depends(get_db)
 ):
     """List challenges visible to authenticated demo users."""
-    if current_user.role == "officer":
-        return db.query(Challenge).order_by(Challenge.id.desc()).all()
-    # Startups and evaluators see published challenges
-    return db.query(Challenge).filter(Challenge.status == "published").order_by(Challenge.id.desc()).all()
+    try:
+        if current_user.role == "officer":
+            return db.query(Challenge).order_by(Challenge.id.desc()).all()
+        return db.query(Challenge).filter(Challenge.status == "published").order_by(Challenge.id.desc()).all()
+    except Exception as e:
+        print(f"Error fetching challenges: {e}")
+        return []
 
 @router.get("/{challenge_id}", response_model=ChallengeResponse)
 def get_challenge(
