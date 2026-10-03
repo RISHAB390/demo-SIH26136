@@ -52,6 +52,10 @@ def list_challenges(
 ):
     """List challenges visible to authenticated demo users."""
     try:
+        if db.query(Challenge).count() == 0:
+            from app.seed import seed_database
+            seed_database()
+
         if current_user.role == "officer":
             return db.query(Challenge).order_by(Challenge.id.desc()).all()
         return db.query(Challenge).filter(Challenge.status == "published").order_by(Challenge.id.desc()).all()
